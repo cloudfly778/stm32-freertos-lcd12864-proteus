@@ -112,55 +112,57 @@ static void render_frame(const T9Context *ctx, DisplayFrame *out_frame)
     (void)snprintf(out_frame->status, sizeof(out_frame->status), "T9 %-3s Len:%03u",
                    mode_to_text(ctx->mode), (unsigned)ctx->len);
 
-    char lines[64][LCD_COLS + 1U];
-    memset(lines, ' ', sizeof(lines));
-    for (size_t i = 0U; i < 64U; ++i) {
-        lines[i][LCD_COLS] = '\0';
+    for (uint8_t i = 0U; i < LCD_INPUT_ROWS; ++i) {
+        memset(out_frame->lines[i], ' ', LCD_COLS);
+        out_frame->lines[i][LCD_COLS] = '\0';
     }
 
+    uint8_t window_base_row = 0U;
     uint8_t row = 0U;
     uint8_t col = 0U;
+
+    #define SHIFT_WINDOW_UP()                                                     \
+        do {                                                                      \
+            memcpy(out_frame->lines[0], out_frame->lines[1], LCD_COLS + 1U);     \
+            memcpy(out_frame->lines[1], out_frame->lines[2], LCD_COLS + 1U);     \
+            memset(out_frame->lines[2], ' ', LCD_COLS);                           \
+            out_frame->lines[2][LCD_COLS] = '\0';                                 \
+            window_base_row++;                                                    \
+            row = LCD_INPUT_ROWS - 1U;                                            \
+        } while (0)
+
     for (size_t i = 0U; display[i] != '\0'; ++i) {
         if (display[i] == '\n') {
             row++;
             col = 0U;
+            if (row >= LCD_INPUT_ROWS) {
+                SHIFT_WINDOW_UP();
+            }
             continue;
         }
         if (col >= LCD_COLS) {
             row++;
             col = 0U;
+            if (row >= LCD_INPUT_ROWS) {
+                SHIFT_WINDOW_UP();
+            }
         }
-        if (row >= 64U) {
-            break;
-        }
-        lines[row][col++] = display[i];
+        out_frame->lines[row][col++] = display[i];
     }
 
     if (col >= LCD_COLS) {
         row++;
         col = 0U;
-    }
-    if (row >= 64U) {
-        row = 63U;
-        col = LCD_COLS - 1U;
-    }
-
-    uint8_t start = (row >= LCD_INPUT_ROWS) ? (uint8_t)(row - (LCD_INPUT_ROWS - 1U)) : 0U;
-    for (uint8_t i = 0U; i < LCD_INPUT_ROWS; ++i) {
-        const uint8_t src = start + i;
-        if (src < 64U) {
-            memcpy(out_frame->lines[i], lines[src], LCD_COLS + 1U);
-        } else {
-            memset(out_frame->lines[i], ' ', LCD_COLS);
-            out_frame->lines[i][LCD_COLS] = '\0';
+        if (row >= LCD_INPUT_ROWS) {
+            SHIFT_WINDOW_UP();
         }
     }
 
-    out_frame->cursor_line = (uint8_t)(row - start);
-    if (out_frame->cursor_line >= LCD_INPUT_ROWS) {
-        out_frame->cursor_line = LCD_INPUT_ROWS - 1U;
-    }
+    (void)window_base_row;
+    out_frame->cursor_line = row;
     out_frame->cursor_col = (col < LCD_COLS) ? col : (LCD_COLS - 1U);
+
+    #undef SHIFT_WINDOW_UP
 }
 
 void T9_Init(T9Context *ctx)

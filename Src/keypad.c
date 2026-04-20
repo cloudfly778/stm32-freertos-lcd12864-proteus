@@ -20,7 +20,6 @@ static KeyCode keypad_scan_once(void)
         }
 
         Keypad_SetRow(r, 1U);
-        vTaskDelay(pdMS_TO_TICKS(1U));
 
         for (uint8_t c = 0U; c < KEYPAD_COLS; ++c) {
             if (Keypad_ReadCol(c) == 0U) {

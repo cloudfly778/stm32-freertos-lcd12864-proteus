@@ -1,4 +1,5 @@
 #include "lcd12864.h"
+#include <stdio.h>
 #include <string.h>
 
 static void lcd_write_text_line(uint8_t row, const char *line)
@@ -52,7 +53,7 @@ void LCD12864_RenderFrame(const DisplayFrame *frame)
     char row_buf[LCD_COLS + 1U];
     memset(row_buf, ' ', LCD_COLS);
     row_buf[LCD_COLS] = '\0';
-    strncpy(row_buf, frame->status, LCD_COLS);
+    (void)snprintf(row_buf, sizeof(row_buf), "%-*.*s", LCD_COLS, LCD_COLS, frame->status);
     lcd_write_text_line(0U, row_buf);
     lcd_write_text_line(1U, frame->lines[0]);
     lcd_write_text_line(2U, frame->lines[1]);
