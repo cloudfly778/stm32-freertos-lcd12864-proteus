@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520">
+  <rect width="980" height="520" fill="#f8f9fb"/>
+  <text x="30" y="40" font-size="28" font-family="Arial" fill="#1f2937">STM32 + FreeRTOS + LCD12864 (Proteus Wiring Overview)</text>
+
+  <rect x="70" y="100" width="330" height="320" rx="14" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+  <text x="90" y="135" font-size="24" font-family="Arial" fill="#1d4ed8">STM32F103C8T6</text>
+  <text x="90" y="175" font-size="20" font-family="Arial" fill="#111827">PB0  → RS</text>
+  <text x="90" y="205" font-size="20" font-family="Arial" fill="#111827">PB1  → RW</text>
+  <text x="90" y="235" font-size="20" font-family="Arial" fill="#111827">PB10 → EN</text>
+  <text x="90" y="265" font-size="20" font-family="Arial" fill="#111827">PA0..PA7 → D0..D7</text>
+  <text x="90" y="295" font-size="20" font-family="Arial" fill="#111827">3V3/GND → VCC/GND</text>
+
+  <rect x="560" y="100" width="330" height="320" rx="14" fill="#ffffff" stroke="#059669" stroke-width="3"/>
+  <text x="590" y="135" font-size="24" font-family="Arial" fill="#047857">LCD12864</text>
+  <text x="590" y="175" font-size="20" font-family="Arial" fill="#111827">RS  ← PB0</text>
+  <text x="590" y="205" font-size="20" font-family="Arial" fill="#111827">RW  ← PB1</text>
+  <text x="590" y="235" font-size="20" font-family="Arial" fill="#111827">EN  ← PB10</text>
+  <text x="590" y="265" font-size="20" font-family="Arial" fill="#111827">D0..D7 ← PA0..PA7</text>
+  <text x="590" y="295" font-size="20" font-family="Arial" fill="#111827">VCC/GND/VO</text>
+
+  <line x1="400" y1="170" x2="560" y2="170" stroke="#ef4444" stroke-width="3"/>
+  <line x1="400" y1="200" x2="560" y2="200" stroke="#ef4444" stroke-width="3"/>
+  <line x1="400" y1="230" x2="560" y2="230" stroke="#ef4444" stroke-width="3"/>
+  <line x1="400" y1="260" x2="560" y2="260" stroke="#ef4444" stroke-width="3"/>
+  <line x1="400" y1="290" x2="560" y2="290" stroke="#ef4444" stroke-width="3"/>
+</svg>
