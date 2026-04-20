@@ -20,6 +20,9 @@ static const T9KeyMap s_map[10] = {
     {"WXYZ", "wxyz"}
 };
 
+#define T9_PENDING_VIEW_CHARS 1U
+#define T9_DISPLAY_BUFFER_SIZE (T9_TEXT_BUFFER_SIZE + T9_PENDING_VIEW_CHARS + 1U)
+
 static const char *mode_to_text(InputMode mode)
 {
     switch (mode) {
@@ -48,9 +51,9 @@ static uint8_t key_to_digit(KeyCode key, uint8_t *digit)
 
 static void append_char(T9Context *ctx, char ch)
 {
-    if (ctx->len >= T9_TEXT_BUFFER_SIZE) {
-        memmove(&ctx->text[0], &ctx->text[1], T9_TEXT_BUFFER_SIZE - 1U);
-        ctx->len = T9_TEXT_BUFFER_SIZE - 1U;
+    if (ctx->len >= (sizeof(ctx->text) - 1U)) {
+        memmove(&ctx->text[0], &ctx->text[1], ctx->len - 1U);
+        ctx->len -= 1U;
     }
     ctx->text[ctx->len++] = ch;
     ctx->text[ctx->len] = '\0';
@@ -101,9 +104,17 @@ static void commit_pending(T9Context *ctx)
     ctx->pending_tick = 0U;
 }
 
+static void shift_window_up(DisplayFrame *frame)
+{
+    memcpy(frame->lines[0], frame->lines[1], LCD_COLS + 1U);
+    memcpy(frame->lines[1], frame->lines[2], LCD_COLS + 1U);
+    memset(frame->lines[2], ' ', LCD_COLS);
+    frame->lines[2][LCD_COLS] = '\0';
+}
+
 static void render_frame(const T9Context *ctx, DisplayFrame *out_frame)
 {
-    char display[T9_TEXT_BUFFER_SIZE + 2U];
+    char display[T9_DISPLAY_BUFFER_SIZE];
     char pending[2];
     append_pending_char(ctx, pending, sizeof(pending));
 
@@ -117,26 +128,16 @@ static void render_frame(const T9Context *ctx, DisplayFrame *out_frame)
         out_frame->lines[i][LCD_COLS] = '\0';
     }
 
-    uint8_t window_base_row = 0U;
     uint8_t row = 0U;
     uint8_t col = 0U;
-
-    #define SHIFT_WINDOW_UP()                                                     \
-        do {                                                                      \
-            memcpy(out_frame->lines[0], out_frame->lines[1], LCD_COLS + 1U);     \
-            memcpy(out_frame->lines[1], out_frame->lines[2], LCD_COLS + 1U);     \
-            memset(out_frame->lines[2], ' ', LCD_COLS);                           \
-            out_frame->lines[2][LCD_COLS] = '\0';                                 \
-            window_base_row++;                                                    \
-            row = LCD_INPUT_ROWS - 1U;                                            \
-        } while (0)
 
     for (size_t i = 0U; display[i] != '\0'; ++i) {
         if (display[i] == '\n') {
             row++;
             col = 0U;
             if (row >= LCD_INPUT_ROWS) {
-                SHIFT_WINDOW_UP();
+                shift_window_up(out_frame);
+                row = LCD_INPUT_ROWS - 1U;
             }
             continue;
         }
@@ -144,7 +145,8 @@ static void render_frame(const T9Context *ctx, DisplayFrame *out_frame)
             row++;
             col = 0U;
             if (row >= LCD_INPUT_ROWS) {
-                SHIFT_WINDOW_UP();
+                shift_window_up(out_frame);
+                row = LCD_INPUT_ROWS - 1U;
             }
         }
         out_frame->lines[row][col++] = display[i];
@@ -154,15 +156,13 @@ static void render_frame(const T9Context *ctx, DisplayFrame *out_frame)
         row++;
         col = 0U;
         if (row >= LCD_INPUT_ROWS) {
-            SHIFT_WINDOW_UP();
+            shift_window_up(out_frame);
+            row = LCD_INPUT_ROWS - 1U;
         }
     }
 
-    (void)window_base_row;
     out_frame->cursor_line = row;
     out_frame->cursor_col = (col < LCD_COLS) ? col : (LCD_COLS - 1U);
-
-    #undef SHIFT_WINDOW_UP
 }
 
 void T9_Init(T9Context *ctx)
@@ -265,11 +265,13 @@ void T9_ProcessEvent(T9Context *ctx, const KeyEvent *event, TickType_t now, Disp
     render_frame(ctx, out_frame);
 }
 
-void T9_ProcessTimeout(T9Context *ctx, TickType_t now, DisplayFrame *out_frame)
+BaseType_t T9_ProcessTimeout(T9Context *ctx, TickType_t now, DisplayFrame *out_frame)
 {
     if ((ctx->pending_key != KEY_NONE) &&
         ((now - ctx->pending_tick) > pdMS_TO_TICKS(T9_MULTI_TAP_TIMEOUT_MS))) {
         commit_pending(ctx);
         render_frame(ctx, out_frame);
+        return pdTRUE;
     }
+    return pdFALSE;
 }

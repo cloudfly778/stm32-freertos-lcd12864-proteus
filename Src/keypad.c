@@ -22,7 +22,7 @@ static KeyCode keypad_scan_once(void)
         Keypad_SetRow(r, 1U);
 
         for (uint8_t c = 0U; c < KEYPAD_COLS; ++c) {
-            if (Keypad_ReadCol(c) == 0U) {
+            if (Keypad_ReadCol(c) == KEYPAD_COL_PRESSED) {
                 Keypad_SetRow(r, 0U);
                 return s_key_map[r][c];
             }
@@ -97,5 +97,6 @@ __attribute__((weak)) void Keypad_SetRow(uint8_t row, uint8_t active)
 __attribute__((weak)) uint8_t Keypad_ReadCol(uint8_t col)
 {
     (void)col;
+    /* 弱符号默认返回未按下（active-low 键值中 1=release, 0=pressed） */
     return 1U;
 }

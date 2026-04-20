@@ -44,8 +44,9 @@ void Input_Task(void *argument)
             T9_ProcessEvent(&ctx, &event, xTaskGetTickCount(), &frame);
             (void)xQueueOverwrite(g_app_queues.lcd_queue, &frame);
         } else {
-            T9_ProcessTimeout(&ctx, xTaskGetTickCount(), &frame);
-            (void)xQueueOverwrite(g_app_queues.lcd_queue, &frame);
+            if (T9_ProcessTimeout(&ctx, xTaskGetTickCount(), &frame) == pdTRUE) {
+                (void)xQueueOverwrite(g_app_queues.lcd_queue, &frame);
+            }
         }
     }
 }

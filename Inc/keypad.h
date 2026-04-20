@@ -10,6 +10,7 @@
 #define KEYPAD_DEBOUNCE_COUNT    3U
 #define KEYPAD_REPEAT_START_MS   500U
 #define KEYPAD_REPEAT_NEXT_MS    200U
+#define KEYPAD_COL_PRESSED       0U
 
 typedef enum {
     KEY_NONE = 0,

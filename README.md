@@ -2,6 +2,8 @@
 
 作业2实现：基于 STM32F103 + FreeRTOS + LCD12864 + 4x4 矩阵键盘（九宫格/T9 多击输入）。
 
+English summary: This repository now includes a modular assignment-2 implementation for STM32F103 + FreeRTOS + LCD12864 + 4x4 matrix keypad with T9 multi-tap input, delete, mode switch, and LCD text refresh tasks.
+
 ## 1. 工程结构
 
 > 当前仓库未携带完整 Keil/IAR 工程文件，本次补充了可直接复用的模块化源码骨架。
@@ -91,8 +93,8 @@ Src/
 - 超时或按下不同键：自动确认上一字符并开始新字符。
 - 支持：
   - 数字直接输入（`123` 模式）
-  - 大写输入（示例：`1ABC1ABC...`）
-  - 小写输入（示例：`1abc1abc...`）
+  - 大写输入（示例：`2` 键对应 `ABC` 多击循环，`3` 键对应 `DEF` 多击循环）
+  - 小写输入（示例：`2` 键对应 `abc` 多击循环，`3` 键对应 `def` 多击循环）
   - 删除上一个字符
   - 回车换行与自动滚动显示（保留状态栏 + 3 行文本窗口）
 

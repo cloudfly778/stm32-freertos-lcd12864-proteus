@@ -26,6 +26,6 @@ typedef struct {
 
 void T9_Init(T9Context *ctx);
 void T9_ProcessEvent(T9Context *ctx, const KeyEvent *event, TickType_t now, DisplayFrame *out_frame);
-void T9_ProcessTimeout(T9Context *ctx, TickType_t now, DisplayFrame *out_frame);
+BaseType_t T9_ProcessTimeout(T9Context *ctx, TickType_t now, DisplayFrame *out_frame);
 
 #endif
